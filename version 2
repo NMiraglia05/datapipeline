@@ -1,0 +1,61 @@
+import pandas as pd
+import gspread
+import os
+import os.path
+from tkinter import simpledialog
+
+gc = gspread.oauth()
+SheetsGenerated= 0
+
+try: SheetCount = int(simpledialog.askstring(title="Sheet count",
+                                  prompt="Enter the amount of pages as a number(1,2,3,etc)"))
+except ValueError:
+    print("Error 1: Please enter the sheet count as a number.")
+
+WorkbookName = (simpledialog.askstring(title="Name",
+                                  prompt="What is the name of the workbook?"))+".xlsx"
+
+if os.path.isfile(WorkbookName) == False:
+    writer= pd.ExcelWriter(WorkbookName)
+    operation= 1
+else:
+    writer= pd.ExcelWriter(WorkbookName, mode='a')
+
+def SpreadSheet_Generator(datasheet:str): # determines what type of file is being processed and processes accordingly(Pandas for CSV and excel, GSpread for google sheets)
+    USER_INP = datasheet.strip('"')
+    if USER_INP.startswith("https://docs.google.com/spreadsheets"):
+            sh = gc.open_by_url(USER_INP)
+            worksheet= sh.get_worksheet(0)
+            dataframe = pd.DataFrame(worksheet.get_all_records())
+            return dataframe
+    elif USER_INP.endswith(".csv"):
+        try:
+            USER_INP = USER_INP.replace("\\","/")
+            dataframe = pd.read_csv(USER_INP)
+            return dataframe
+        except:
+            print("Hnnnng")
+    elif USER_INP.endswith(".xlsx"):
+        try:
+            USER_INP = USER_INP.replace("\\","/")
+            dataframe = pd.read_excel(USER_INP)
+            return dataframe
+        except FileNotFoundError:
+            print("Error 3: The excel file could not be found.")
+        except Exception:
+            print("An unexpected error occured.")
+    else:
+         print("Error: Data format could not be found.")
+
+for i in range(SheetCount):
+    sheetname = simpledialog.askstring(title="Name.",
+                prompt="What is the name of this page?")
+    datasheet = simpledialog.askstring(title="Sheet",
+                prompt="Enter the URL/file name.")
+    df=SpreadSheet_Generator(datasheet)
+    if operation == 1:
+        df.to_excel(writer,sheet_name=sheetname)
+        writer= pd.ExcelWriter(WorkbookName, mode='a')
+        operation = 0
+    else:
+        df.to_excel(writer,sheet_name=sheetname)
