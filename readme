@@ -1,0 +1,2 @@
+This was a program I wrote to concatenate multiple files of the format of either CSV, xlsx, or google sheets into one excel sheet. 
+As is, it only takes input via direct user input. However, this could be fully automated to instead take data in from several sources.
