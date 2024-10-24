@@ -19,7 +19,7 @@ if os.path.isfile(WorkbookName) == False:
     writer= pd.ExcelWriter(WorkbookName)
     operation= 1
 else:
-    writer= pd.ExcelWriter(WorkbookName, mode='a')
+    writer= pd.ExcelWriter(WorkbookName, engine='openpyxl', mode='a')
 
 def SpreadSheet_Generator(datasheet:str): # determines what type of file is being processed and processes accordingly(Pandas for CSV and excel, GSpread for google sheets)
     USER_INP = datasheet.strip('"')
@@ -42,8 +42,6 @@ def SpreadSheet_Generator(datasheet:str): # determines what type of file is bein
             return dataframe
         except FileNotFoundError:
             print("Error 3: The excel file could not be found.")
-        except Exception:
-            print("An unexpected error occured.")
     else:
          print("Error: Data format could not be found.")
 
@@ -55,7 +53,7 @@ for i in range(SheetCount):
     df=SpreadSheet_Generator(datasheet)
     if operation == 1:
         df.to_excel(writer,sheet_name=sheetname, index=False)
-        writer= pd.ExcelWriter(WorkbookName, mode='a')
+        writer= pd.ExcelWriter(WorkbookName, engine='openpyxl', mode='a')
         operation = 0
     else:
         df.to_excel(writer,sheet_name=sheetname, index=False)
